@@ -30,8 +30,9 @@ export function VariantSheet({
     size: "",
     stock: "",
   });
-
-  
+  const [image, setImage] = useState<string>("");
+  console.log("Uploaded image URL:", image);
+  console.log("Product ID:", productId);
 
   const handleInputChange = (field: string, value: string | number) => {
     setVariantData((prev) => ({ ...prev, [field]: value }));
@@ -92,7 +93,7 @@ export function VariantSheet({
             </Field>
 
             {/* Image Upload */}
-            <ImageUpload />
+            <ImageUpload setImage={setImage} />
           </SheetPanel>
           <SheetFooter>
             <SheetClose

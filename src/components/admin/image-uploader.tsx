@@ -23,8 +23,12 @@ interface ImageFile {
 /* --------------------------------------------------
  * COMPONENT
  * -------------------------------------------------- */
-export function ImageUpload() {
-  const [images, setImages] = useState<ImageFile[]>([]);
+export function ImageUpload({
+  setImage,
+}: {
+  setImage: (images: string[]) => void;
+}) {
+  const [images, setImages] = useState<string[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -76,57 +80,59 @@ export function ImageUpload() {
     formData.append("api_key", "142188283175534");
 
     try {
-      await fetch("https://api.cloudinary.com/v1_1/ddmr6pt5h/auto/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const response: any = await fetch(
+        "https://api.cloudinary.com/v1_1/ddmr6pt5h/auto/upload",
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
 
-      setImages((prev) =>
-        prev.map((i) =>
-          i.id === img.id ? { ...i, status: "completed", progress: 100 } : i,
-        ),
-      );
+      setImages((prev) => [...prev, response?.secure_url]);
+      setImage(images);
+      console.log(images);
     } catch (err: any) {
-      setImages((prev) =>
-        prev.map((i) =>
-          i.id === img.id ? { ...i, status: "error", error: err.message } : i,
-        ),
-      );
+      setImages((prev) => [...prev, response?.secure_url]);
+      setImage(images);
+      console.log(images);
     }
   };
 
   /* --------------------------------------------------
    * ADD FILES
    * -------------------------------------------------- */
-  const addImages = useCallback(async (files: FileList) => {
-    const valid: ImageFile[] = [];
-    const errs: string[] = [];
+  const addImages = useCallback(
+    async (files: FileList) => {
+      const valid: ImageFile[] = [];
+      const errs: string[] = [];
 
-    Array.from(files).forEach((file) => {
-      const err = validateFile(file);
-      if (err) {
-        errs.push(`${file.name}: ${err}`);
-        return;
-      }
+      Array.from(files).forEach((file) => {
+        const err = validateFile(file);
+        if (err) {
+          errs.push(`${file.name}: ${err}`);
+          return;
+        }
 
-      valid.push({
-        id: crypto.randomUUID(),
-        file,
-        preview: URL.createObjectURL(file),
-        progress: 0,
-        status: "uploading",
+        valid.push({
+          id: crypto.randomUUID(),
+          file,
+          preview: URL.createObjectURL(file),
+          progress: 0,
+          status: "uploading",
+        });
       });
-    });
 
-    if (errs.length) setErrors(errs);
-    if (!valid.length) return;
+      if (errs.length) setErrors(errs);
+      if (!valid.length) return;
 
-    setImages((prev) => [...prev, ...valid]);
+      setImages((prev) => [...prev, ...valid.map((img) => img.preview)]);
 
-    const signature = await fetchSignature();
+      const signature = await fetchSignature();
 
-    valid.forEach((img) => uploadToCloudinary(img, signature));
-  }, []);
+      valid.forEach((img) => uploadToCloudinary(img, signature));
+    },
+    [uploadToCloudinary],
+  );
 
   /* --------------------------------------------------
    * RENDER
@@ -139,7 +145,7 @@ export function ImageUpload() {
           {images.map((img) => (
             <img
               key={img.id}
-              src={img.preview}
+              src={img}
               className="h-[120px] w-full object-cover rounded-md"
             />
           ))}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Activity, useState } from "react";
+import React, { useState } from "react";
 
 import {
   Card,
@@ -25,9 +25,9 @@ import {
   SelectPopup,
   SelectItem,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Button } from "../ui/button";
 import { VariantSheet } from "./variant-sheet";
+import { api } from "@/lib/api";
 
 export default function CreateProductCard() {
   const [data, setData] = useState<Record<string, any>>({
@@ -39,6 +39,9 @@ export default function CreateProductCard() {
     price: "",
     mrp: "",
     isActive: false,
+    design: "",
+    label: "",
+    sku: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -47,7 +50,7 @@ export default function CreateProductCard() {
     id: "",
   });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const finalData = {
       ...data,
@@ -56,10 +59,14 @@ export default function CreateProductCard() {
       category: data.category?.toString().toUpperCase(),
       subCategory: data.subCategory?.toString().toUpperCase(),
     };
-    console.log(finalData);
-    setIsLoading(true);
+    const response = await api.post("/admin/product/create", finalData);
+    if (!response?.status) {
+      alert("Error creating product");
+      return;
+    }
+    console.log("Product created:", response);
+    setResponse({ id: response.data.id });
     setIsSuccess(true);
-    setIsOpen(true);
   };
 
   return (
@@ -76,7 +83,7 @@ export default function CreateProductCard() {
             <FieldItem className="w-full">
               <Select
                 name="category"
-                defaultValue="MEN"
+                defaultValue="WOMEN"
                 value={data.category}
                 onValueChange={(value) => setData({ ...data, category: value })}
               >
@@ -108,6 +115,49 @@ export default function CreateProductCard() {
               />
             </FieldItem>
             <FieldDescription>Choose the product type.</FieldDescription>
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="design">Design</FieldLabel>
+            <FieldItem className="w-full">
+              <Select
+                name="design"
+                defaultValue="MEN"
+                value={data.design}
+                onValueChange={(value) => setData({ ...data, design: value })}
+              >
+                <SelectTrigger aria-label="Category">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectPopup>
+                  <SelectItem value="Floral Print">Floral Print</SelectItem>
+                  <SelectItem value="Ethnic Print">Ethnic Print</SelectItem>
+                  <SelectItem value="Abstract Print">Abstract Print</SelectItem>
+                  <SelectItem value="Solid">Solid</SelectItem>
+                  <SelectItem value="Checks">Checks</SelectItem>
+                  <SelectItem value="Stripes">Stripes</SelectItem>
+                  <SelectItem value="Bandhani">Bandhani</SelectItem>
+                  <SelectItem value="Leheriya">Leheriya</SelectItem>
+                  <SelectItem value="Tie & Dye">Tie & Dye</SelectItem>
+                  <SelectItem value="Block Print">Block Print</SelectItem>
+                </SelectPopup>
+              </Select>
+            </FieldItem>
+            <FieldDescription>Select the main design.</FieldDescription>
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="label">Label</FieldLabel>
+            <FieldItem className="w-full">
+              <Input
+                id="label"
+                name="label"
+                placeholder="Enter label"
+                value={data.label}
+                onChange={(e) => setData({ ...data, label: e.target.value })}
+              />
+            </FieldItem>
+            <FieldDescription>Choose the product label.</FieldDescription>
           </Field>
 
           {/* Name */}
@@ -187,6 +237,21 @@ export default function CreateProductCard() {
                 placeholder="999"
                 value={data.mrp}
                 onChange={(e) => setData({ ...data, mrp: e.target.value })}
+              />
+            </FieldItem>
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="sku">SKU</FieldLabel>
+            <FieldItem className="w-full">
+              <Input
+                id="sku"
+                name="sku"
+                type="text"
+                min={0}
+                placeholder="Secret code"
+                value={data.sku}
+                onChange={(e) => setData({ ...data, sku: e.target.value })}
               />
             </FieldItem>
           </Field>

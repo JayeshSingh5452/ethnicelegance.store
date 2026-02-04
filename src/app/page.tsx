@@ -6,20 +6,31 @@ import { Footer } from "@/components/landing/footer";
 import { Header } from "@/components/landing/header";
 import { PopularKurta } from "@/components/landing/popular-product";
 import { Testimonials } from "@/components/landing/testimonials";
+import { HeroStats } from "@/components/landing/hero-stats";
+import { ComparisonSection } from "@/components/landing/comparison-section";
+import { CraftsmanshipSection } from "@/components/landing/craftsmanship-section";
+import { FabricSection } from "@/components/landing/fabric-section";
+import { CTASection } from "@/components/landing/cta-section";
+import { Hero } from "@/components/landing/hero";
+import { BentoGrid } from "@/components/landing/bento-card";
+import { Features } from "@/components/landing/feature";
 
 export default function Home() {
   return (
     <>
       {/* <OfferBanner /> */}
       <Header />
-      <main className="max-w-7xl 2xl:mx-auto mx-4 ">
-        <CarouselHeroSection />
+      <Hero />
+      <main className="font-sans max-w-7xl 2xl:mx-auto mx-4 space-y-16 ">
+        {/* <CarouselHeroSection /> */}
+        <BentoGrid />
         <BrowserCategorySection />
         <PopularKurta />
-        <BentoSection />
+        <CraftsmanshipSection />
         <Testimonials />
       </main>
 
+      <Features />
       <Footer />
     </>
   );
